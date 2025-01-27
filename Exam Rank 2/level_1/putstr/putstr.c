@@ -1,4 +1,4 @@
-#include "unistd.h"
+#include <unistd.h>
 
 void	ft_putstr(char *str)
 {
@@ -10,11 +10,4 @@ void	ft_putstr(char *str)
 		write(1, &str[i], 1);
 		i++;
 	}
-}
-
-int main()
-{
-	char *str = "Hola que tal";
-	ft_putstr(str);
-	return (0);
 }
