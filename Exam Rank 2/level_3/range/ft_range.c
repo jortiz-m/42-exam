@@ -52,16 +52,3 @@ int     *ft_range(int start, int end)
 
 	return(array);
 }
-
-int main()
-{
-	int start = 4;
-	int	end = 8;
-
-	while(start <= end)
-	{
-		printf("%d", *ft_range(start, end));
-		start++;
-	}
-	return(0);
-}
