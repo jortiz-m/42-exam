@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int *ft_range(int start, int end)
+int *ft_rrange(int start, int end)
 {
     int size;
     int *array;
@@ -42,4 +42,34 @@ int *ft_range(int start, int end)
         array[0] = start;
     }
     return (array);
+}
+int main(void)
+{
+    int start = 0;
+    int end = -3;
+    int *array;
+    int len;
+    int i;
+
+    // Determinar la longitud del array
+    len = (start > end) ? (start - end) : (end - start);
+    len += 1; // Incluir ambos extremos
+
+    array = ft_rrange(start, end);
+    if (!array)
+    {
+        printf("Error al asignar memoria\n");
+        return (1);
+    }
+
+    // Imprimir el array
+    printf("Array generado: ");
+    for (i = 0; i < len; i++)
+        printf("%d ", array[i]);
+    printf("\n");
+
+    // Liberar memoria
+    free(array);
+
+    return (0);
 }
