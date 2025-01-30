@@ -1,70 +1,72 @@
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-char	*ft_save(char *str) // coseguir la primera palabra y gardarla para ponerla al final
+void    ft_print_str(char *str)
 {
-	int		len;
-	char	*res;
-	int		i;
+    int flag;
+    int i;
 
-	i = 0;
-	len = 0;
-	while (str[len] != ' ' && str[len] != '\t') // +1 para el nulo
-		len++;
-	res = malloc((len + 1) * sizeof(char*));
-	while(*str && i < len)
-	{
-		res[i] = *str;
-		i++;
-		str++;
-	}
-	res[i] = '\0'; 
-	return(res);
+    i = 0;
+    flag = 0;
+    while(str[i])
+    {
+        if(str[i] == ' ' || str[i] == '\t')
+            flag = 1;
+        else if(str[i] != ' ' || str[i] != '\t')
+        {
+            if(flag == 1)
+            {
+                write(1, " ", 1);
+                flag = 0;
+            }
+            write(1, &str[i], 1);
+        }
+        i++;
+    }
 }
 
-void	ft_print(char *str)
+char    *ft_res(char *str)
 {
-	int	flag;
+    int i;
+    char *res;
 
-	flag = 0;
-	while(*str)
-	{
-		if(*str != ' ' && *str != '\t')
-		{
-			if(flag)
-			{
-				write(1, " ", 1);
-				flag = 0;
-			}
-			write(1, str, 1);
-		}
-		else if (*str == ' ' && *(str + 1) != ' ')
-			flag = 1;
-		else if (*str == '\t' && *(str + 1) != '\t')
-			flag = 1;	
-		str++;
-	}
+    i = 0;
+    while(str[i] && (str[i] != ' ' && str[i] != '\t'))
+        i++;
+    res = malloc((i + 1) * sizeof(char));
+    i = 0;
+    while(*str != ' ' && *str != '\t')
+    {
+        res[i] = *str;
+        str++;
+        i++;
+    }
+    res[i] = '\0';
+    return(res);
 }
 
 int main(int ac, char **av)
 {
-	char	*str;
-	char	*res;
+    int     i;
+    char    *res;
+    char    *str;
 
-	str = av[1];
-	if(ac == 2)
-	{
-		while(*str == ' ' || *str == '\t') //quitando espacios de delante
-			str++;
-		res = ft_save(str); //coger la primera palabra
-		while(*str && (*str != ' ' && *str != '\t')) //quito la primera palabra de mi argumento
-			str++;
-		while(*str == ' ' || *str == '\t') //quitando espacios multiples después de quitar la primera palabra
-			str++;
-		ft_print(str);
-		write(1, " ", 1);
-		ft_print(res);
-	}
-	write(1, "\n", 1);
-	return (0);
+    i = 0;
+    if(ac >= 2)
+    {
+        str = av[1];
+        while(*str == ' ' || *str == '\t') //quito el principio
+            str++;
+        res = ft_res(str); //tengo el principio en esta variable con el nulo
+        while(*str && (*str != ' ' && *str != '\t')) //quito la palabra
+            str++;
+        while(*str == ' ' || *str == '\t') //quito los espacios y tab del medio
+            str++;
+        ft_print_str(str);
+        if(ac == 2)
+            write(1, " ", 1);
+        ft_print_str(res);
+    }
+    write(1, "\n", 1);
+    return(0);
 }

@@ -20,12 +20,7 @@ bool	ft_primos(unsigned int number)
 }
 int main()
 {
-	int	i = 2;
 
-	while(i <= 20)
-	{
-		ft_primos(i);
-		i++;
-	}
+	ft_primos(37);
 	return(0);
 }
