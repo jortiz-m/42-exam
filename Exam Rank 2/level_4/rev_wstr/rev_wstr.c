@@ -27,7 +27,7 @@ int main(int ac, char **av)
                 write(1, &av[1][start], 1);
                 start++;
             }
-            if(flag != 0) //la flag es donde emepezamos para cuando sea cero es la primera palabra
+            if(flag != 0) //la flag es donde empezamos para cuando sea cero es la primera palabra
                 write(1, " ", 1); //para que no haya un espacio al final de más
         }
     }

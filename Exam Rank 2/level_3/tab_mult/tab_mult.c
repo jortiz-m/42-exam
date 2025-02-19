@@ -24,6 +24,8 @@ int    atoi(const char *str)
     }
     return(number * sing);
 }
+//MUY IMPORTANTE inicializar siempre number, sino 
+//aunque la lógica esté bien no funciona correctamente
 
 void	ft_putnumber(int number)
 {
