@@ -1,28 +1,22 @@
-Assignment name  : do_op
-Expected files   : *.c, *.h
-Allowed functions: atoi, printf, write
+Assignment name  : ft_strcmp
+Expected files   : ft_strcmp.c
+Allowed functions:
 --------------------------------------------------------------------------------
 
-Write a program that takes three strings:
-- The first and the third one are representations of base-10 signed integers
-  that fit in an int.
-- The second one is an arithmetic operator chosen from: + - * / %
+Reproduce the behavior of the function strcmp (man strcmp).
 
-The program must display the result of the requested arithmetic operation,
-followed by a newline. If the number of parameters is not 3, the program
-just displays a newline.
+Your function must be declared as follows:
 
-You can assume the string have no mistakes or extraneous characters. Negative
-numbers, in input or output, will have one and only one leading '-'. The
-result of the operation fits in an int.
+int    ft_strcmp(char *s1, char *s2);
 
-Examples:
+The  strcmp() function compares the two strings s1 and s2. The locale is not
+taken into account (for a locale-aware comparison, see strcoll(3)).  The com‐
+parison is done using unsigned characters.
 
-$> ./do_op "123" "*" 456 | cat -e
-56088$
-$> ./do_op "9828" "/" 234 | cat -e
-42$
-$> ./do_op "1" "+" "-43" | cat -e
--42$
-$> ./do_op | cat -e
-$
+strcmp()  returns an integer indicating the result of the comparison, as follows:
+
+• 0, if the s1 and s2 are equal;
+
+• a negative value if s1 is less than s2;
+
+• a positive value if s1 is greater than s2.
