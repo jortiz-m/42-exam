@@ -21,7 +21,7 @@ int     ft_putstr(char *str)
         return (count);
 }
 
-int     ft_putnbr(int n)
+int     ft_putnbr(unsigned int n)
 {
         size_t  count;
 
@@ -39,7 +39,7 @@ int     ft_putnbr(int n)
         return (count);
 }
 
-size_t  ft_puthex(int n)
+size_t  ft_puthex(unsigned int n)
 {
         size_t  count;
 
@@ -58,13 +58,11 @@ int     ft_format(va_list lst, char c)
         if (c == 's')
                 totallen = ft_putstr(va_arg (lst, char *));
         else if (c == 'd' || c == 'i')
-                totallen = ft_putnbr(va_arg (lst, int));
+                totallen = ft_putnbr(va_arg (lst, unsigned int));
         else if (c == 'x')
-                totallen = ft_puthex(va_arg (lst, size_t));
-        else if (c == '%')
-                totallen = ft_putchar('%');
+                totallen = ft_puthex(va_arg (lst, unsigned int));
         else
-                return (0);
+                totallen += write (1, &lst, 1);
         return (totallen);
 }
 
