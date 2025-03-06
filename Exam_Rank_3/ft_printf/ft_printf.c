@@ -6,64 +6,59 @@ int     ft_putchar(char c)
         return(write(1, &c, 1));
 }
 
-int     ft_putstr(char *str)
+void     ft_putstr(char *str, int *len)
 {
-        size_t  count;
-
-        count = 0;
         if (!str)
                 str = "(null)";
         while (*str)
         {
-                count += ft_putchar(*str);
+                *len += ft_putchar(*str);
                 str++;
         }
-        return (count);
 }
 
-int     ft_putnbr(unsigned int n)
+void    ft_putnbr(int n, int *len)
 {
-        size_t  count;
-
-        count = 0;
         if (n == -2147483648)
-                return (write(1, "-2147483648", 11));
+        {
+                ft_putstr("-2147483648", len);
+                return ;
+        }
         if (n < 0)
         {
-                count += ft_putchar('-');
-                n = n * (-1);
+                *len += ft_putchar('-');
+                n = -n;
         }
         if (n >= 10)
-                count += ft_putnbr(n / 10);
-        count += ft_putchar('0' + (n % 10));
-        return (count);
+                ft_putnbr((n / 10), len);
+        *len += ft_putchar('0' + (n % 10));
 }
 
-size_t  ft_puthex(unsigned int n)
+void ft_puthex(unsigned int n, int *len)
 {
-        size_t  count;
+    char *hex = "0123456789abcdef";
 
-        count = 0;
-        if (n >= 16)
-                count += ft_puthex(n / 16);
-        count += ft_putchar("0123456789abcdef" [n % 16]);
-        return (count);
+	if (n >= 16)
+	{
+		ft_puthex((n / 16), len);
+	}
+	*len +=ft_putchar(hex[n % 16]);
 }
 
 int     ft_format(va_list lst, char c)
 {
-        int     totallen;
+        int     len;
 
-        totallen = 0;
+        len = 0;
         if (c == 's')
-                totallen = ft_putstr(va_arg (lst, char *));
+                ft_putstr(va_arg (lst, char *), &len);
         else if (c == 'd' || c == 'i')
-                totallen = ft_putnbr(va_arg (lst, unsigned int));
+                ft_putnbr(va_arg (lst, int), &len);
         else if (c == 'x')
-                totallen = ft_puthex(va_arg (lst, unsigned int));
+                ft_puthex(va_arg (lst, unsigned int), &len);
         else
-                totallen += write (1, &lst, 1);
-        return (totallen);
+                len += ft_putchar(c);
+        return (len);
 }
 
 int     ft_printf(const char *str, ...)
@@ -173,13 +168,6 @@ int main(void)
     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
     printf("Caracteres impresos por printf:    %d\n", count_std);
 
-    // Caso de prueba para hexadecimales con mayúsculas
-    printf("\nPrueba para hexadecimales con mayúsculas:\n");
-    count_ft = ft_printf("ft_printf: %X\n", 255);
-    count_std = printf("printf:    %X\n", 255);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
     // Caso de prueba para el valor máximo de un int
     printf("\nPrueba para el valor máximo de un int:\n");
     count_ft = ft_printf("ft_printf: %d\n", INT_MAX);
@@ -222,13 +210,6 @@ int main(void)
      printf("\nPrueba para hexadecimales:\n");
      count_ft = ft_printf("ft_printf: %x\n", 255);
      count_std = printf("printf:    %x\n", 255);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Caso de prueba para hexadecimales con mayúsculas
-     printf("\nPrueba para hexadecimales con mayúsculas:\n");
-     count_ft = ft_printf("ft_printf: %X\n", 255);
-     count_std = printf("printf:    %X\n", 255);
      printf("Caracteres impresos por ft_printf: %d\n", count_ft);
      printf("Caracteres impresos por printf:    %d\n", count_std);
  
@@ -308,5 +289,5 @@ int main(void)
      printf("Caracteres impresos por ft_printf: %d\n", count_ft);
      printf("Caracteres impresos por printf:    %d\n", count_std);
 
-    return 0;
+    return (0);
 }
