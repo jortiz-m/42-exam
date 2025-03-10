@@ -1,293 +1,106 @@
-# include <stdarg.h>
-# include <unistd.h>
+#include <unistd.h>
+#include <stdarg.h>
 
 int     ft_putchar(char c)
 {
         return(write(1, &c, 1));
 }
 
-void     ft_putstr(char *str, int *len)
+void    ft_putstr(char *str, int *len)
 {
-        if (!str)
+        if(!str)
                 str = "(null)";
-        while (*str)
+        while(*str)
         {
                 *len += ft_putchar(*str);
                 str++;
         }
 }
 
-void    ft_putnbr(int n, int *len)
+void    ft_putnbr(int number, int *len)
 {
-        if (n == -2147483648)
+        if(number == -2147483648)
         {
                 ft_putstr("-2147483648", len);
                 return ;
         }
-        if (n < 0)
+        if(number < 0)
         {
                 *len += ft_putchar('-');
-                n = -n;
+                number = -number;
         }
-        if (n >= 10)
-                ft_putnbr((n / 10), len);
-        *len += ft_putchar('0' + (n % 10));
+        if(number >= 10)
+                ft_putnbr((number / 10), len);
+        *len += ft_putchar('0' + (number % 10));
 }
 
-void ft_puthex(unsigned int n, int *len)
+void    ft_puthex(unsigned int  number, int *len)
 {
-    char *hex = "0123456789abcdef";
+        char    *hex = "0123456789abcdef";
 
-	if (n >= 16)
-	{
-		ft_puthex((n / 16), len);
-	}
-	*len +=ft_putchar(hex[n % 16]);
+        if(number >= 16)
+                ft_puthex((number / 16), len);
+        *len += ft_putchar(hex[number % 16]);
 }
-
-int     ft_format(va_list lst, char c)
+void    ft_format(va_list av, char c, int *len)
 {
-        int     len;
-
-        len = 0;
-        if (c == 's')
-                ft_putstr(va_arg (lst, char *), &len);
-        else if (c == 'd' || c == 'i')
-                ft_putnbr(va_arg (lst, int), &len);
-        else if (c == 'x')
-                ft_puthex(va_arg (lst, unsigned int), &len);
-        else
-                len += ft_putchar(c);
-        return (len);
+        if(c == 's')
+                ft_putstr(va_arg(av, char*), len);
+        else if(c == 'd')
+                ft_putnbr(va_arg(av, int), len);
+        else if(c == 'x')
+                ft_puthex(va_arg(av, unsigned int), len);
 }
 
 int     ft_printf(const char *str, ...)
 {
-        va_list args;
-        int     i;
+        va_list av;
         int     len;
+        int     i;
 
         i = 0;
         len = 0;
-        va_start(args, str);
-        if (write(1, "", 0) == -1)
-                return (-1);
-        while (str[i])
+        va_start(av, str);
+        while(str[i])
         {
-                if (str[i] == '%')
+                if(str[i] == '%')
                 {
                         i++;
-                        len += ft_format(args, str[i]);
+                        ft_format(av, str[i], &len);
                 }
                 else
                         len += ft_putchar(str[i]);
                 i++;
         }
-        va_end (args);
-        return (len);
+        va_end(av);
+        return(len);
 }
 
 #include <stdio.h>
-#include <limits.h>
-
-// Prototipo de tu función ft_printf
-int ft_printf(const char *format, ...);
 
 int main(void)
 {
-    int count_ft;
-    int count_std;
+        int len;
 
-    // Caso de prueba para strings
-    printf("\nPrueba para strings:\n");
-    count_ft = ft_printf("ft_printf: %s\n", "Hola, mundo!");
-    count_std = printf("printf:    %s\n", "Hola, mundo!");
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
+        // Caso de prueba para strings
+        len = printf("El uno -> %s\n", "HolaMundo");
+        printf("Impreso = %d\n", len);
+        len = ft_printf("El mio -> %s\n", "HolaMundo");
+        printf("Impreso = %d\n", len);
+        printf("\n");
 
-    // Caso de prueba para enteros
-    printf("\nPrueba para enteros:\n");
-    count_ft = ft_printf("ft_printf: %d\n", 42);
-    count_std = printf("printf:    %d\n", 42);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
+        // Caso de prueba para números decimales
+        len = printf("El uno -> %d\n", 42);
+        printf("Impreso = %d\n", len);
+        len = ft_printf("El mio -> %d\n", 42);
+        printf("Impreso = %d\n", len);
+        printf("\n");
 
-    // Caso de prueba para enteros negativos
-    printf("\nPrueba para enteros negativos:\n");
-    count_ft = ft_printf("ft_printf: %d\n", -42);
-    count_std = printf("printf:    %d\n", -42);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para hexadecimales
-    printf("\nPrueba para hexadecimales:\n");
-    count_ft = ft_printf("ft_printf: %x\n", 255);
-    count_std = printf("printf:    %x\n", 255);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para el valor máximo de un int
-    printf("\nPrueba para el valor máximo de un int:\n");
-    count_ft = ft_printf("ft_printf: %d\n", INT_MAX);
-    count_std = printf("printf:    %d\n", INT_MAX);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para el valor mínimo de un int
-    printf("\nPrueba para el valor mínimo de un int:\n");
-    count_ft = ft_printf("ft_printf: %d\n", INT_MIN);
-    count_std = printf("printf:    %d\n", INT_MIN);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para strings
-    printf("\nPrueba para strings:\n");
-    count_ft = ft_printf("ft_printf: %s\n", "Hola, mundo!");
-    count_std = printf("printf:    %s\n", "Hola, mundo!");
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para enteros
-    printf("\nPrueba para enteros:\n");
-    count_ft = ft_printf("ft_printf: %d\n", 42);
-    count_std = printf("printf:    %d\n", 42);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para enteros negativos
-    printf("\nPrueba para enteros negativos:\n");
-    count_ft = ft_printf("ft_printf: %d\n", -42);
-    count_std = printf("printf:    %d\n", -42);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para hexadecimales
-    printf("\nPrueba para hexadecimales:\n");
-    count_ft = ft_printf("ft_printf: %x\n", 255);
-    count_std = printf("printf:    %x\n", 255);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para el valor máximo de un int
-    printf("\nPrueba para el valor máximo de un int:\n");
-    count_ft = ft_printf("ft_printf: %d\n", INT_MAX);
-    count_std = printf("printf:    %d\n", INT_MAX);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Caso de prueba para el valor mínimo de un int
-    printf("\nPrueba para el valor mínimo de un int:\n");
-    count_ft = ft_printf("ft_printf: %d\n", INT_MIN);
-    count_std = printf("printf:    %d\n", INT_MIN);
-    printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-    printf("Caracteres impresos por printf:    %d\n", count_std);
-
-    // Casos raros o edge cases
-    printf("\n=== Casos raros o edge cases ===\n");
-
-     // Caso de prueba para strings
-     printf("\nPrueba para strings:\n");
-     count_ft = ft_printf("ft_printf: %s\n", "Hola, mundo!");
-     count_std = printf("printf:    %s\n", "Hola, mundo!");
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Caso de prueba para enteros
-     printf("\nPrueba para enteros:\n");
-     count_ft = ft_printf("ft_printf: %d\n", 42);
-     count_std = printf("printf:    %d\n", 42);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Caso de prueba para enteros negativos
-     printf("\nPrueba para enteros negativos:\n");
-     count_ft = ft_printf("ft_printf: %d\n", -42);
-     count_std = printf("printf:    %d\n", -42);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Caso de prueba para hexadecimales
-     printf("\nPrueba para hexadecimales:\n");
-     count_ft = ft_printf("ft_printf: %x\n", 255);
-     count_std = printf("printf:    %x\n", 255);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Caso de prueba para el valor máximo de un int
-     printf("\nPrueba para el valor máximo de un int:\n");
-     count_ft = ft_printf("ft_printf: %d\n", INT_MAX);
-     count_std = printf("printf:    %d\n", INT_MAX);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Caso de prueba para el valor mínimo de un int
-     printf("\nPrueba para el valor mínimo de un int:\n");
-     count_ft = ft_printf("ft_printf: %d\n", INT_MIN);
-     count_std = printf("printf:    %d\n", INT_MIN);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // Casos raros o edge cases
-     printf("\n=== Casos raros o edge cases ===\n");
- 
-     // 1. Cadena vacía
-     printf("\n1. Cadena vacía:\n");
-     count_ft = ft_printf("ft_printf: %s\n", "");
-     count_std = printf("printf:    %s\n", "");
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // 2. Puntero nulo (NULL) para %s
-     printf("\n2. Puntero nulo (NULL) para %%s:\n");
-     count_ft = ft_printf("ft_printf: %s\n", NULL); // Manejo manual de NULL
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
- 
-     // 3. Número cero
-     printf("\n3. Número cero:\n");
-     count_ft = ft_printf("ft_printf: %d\n", 0);
-     count_std = printf("printf:    %d\n", 0);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // 4. Hexadecimal con cero
-     printf("\n4. Hexadecimal con cero:\n");
-     count_ft = ft_printf("ft_printf: %x\n", 0);
-     count_std = printf("printf:    %x\n", 0);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // 5. Múltiples especificadores en un solo formato
-     printf("\n5. Múltiples especificadores en un solo formato:\n");
-     count_ft = ft_printf("ft_printf: %s %d %x\n", "Hola", 42, 255);
-     count_std = printf("printf:    %s %d %x\n", "Hola", 42, 255);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // 6. Especificador sin argumento (corregido)
-     printf("\n6. Especificador sin argumento:\n");
-     count_ft = ft_printf("ft_printf: %s %d\n", "Hola", 42); // Eliminamos %x
-     count_std = printf("printf:    %s %d\n", "Hola", 42);   // Eliminamos %x
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // 8. Caracteres no imprimibles en una cadena
-     printf("\n8. Caracteres no imprimibles en una cadena:\n");
-     count_ft = ft_printf("ft_printf: %s\n", "Hola\tmundo\n");
-     count_std = printf("printf:    %s\n", "Hola\tmundo\n");
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
- 
-     // 9. Especificador desconocido (corregido)
-     printf("\n9. Especificador desconocido:\n");
-     count_ft = ft_printf("ft_printf: %k\n", 42); // Prueba tu función
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
- 
-     // 10. Números grandes en hexadecimal
-     printf("\n10. Números grandes en hexadecimal:\n");
-     count_ft = ft_printf("ft_printf: %x\n", 0xDEADBEEF);
-     count_std = printf("printf:    %x\n", 0xDEADBEEF);
-     printf("Caracteres impresos por ft_printf: %d\n", count_ft);
-     printf("Caracteres impresos por printf:    %d\n", count_std);
-
+        // Caso de prueba para números hexadecimales
+        len = printf("El uno -> %x\n", 42);
+        printf("Impreso = %d\n", len);
+        len = ft_printf("El mio -> %x\n", 42);
+        printf("Impreso = %d\n", len);
+        printf("\n");
     return (0);
 }

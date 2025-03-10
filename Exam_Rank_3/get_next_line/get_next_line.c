@@ -8,24 +8,24 @@ char	*get_next_line(int fd)
 	char	c;							
 
     i = 0;
-	if (fd < 0 || BUFFER_SIZE < 1)				
+	if (fd < 0 || BUFFER_SIZE < 1)		
 		return (NULL);
-	buffer = malloc(42000000);	
-	if (!buffer)						
+	buffer = malloc(42000000);
+	if (!buffer)
 		return (NULL);
-    bytes_read = read(fd, &c, 1);				
+    bytes_read = read(fd, &c, 1);			
 	while (bytes_read > 0)
 	{
-		buffer[i] = c;				
+		buffer[i] = c;	
 		i++;
-		if (c == EOF || c == '\n')		
+		if (c == EOF || c == '\n')
 			break ;
-            bytes_read = read(fd, &c, 1);	
+        bytes_read = read(fd, &c, 1);
 	}
 	if (i == 0 || bytes_read < 0)
 	{
-		free(buffer);		
-		return (NULL);		
+		free(buffer);
+		return (NULL);
 	}
 	buffer[i] = '\0';			
 	return (buffer);		
