@@ -1,54 +1,60 @@
-#include "get_next_line.h"
+#include <unistd.h> //read
+#include <stdio.h> //printf
+#include <stdlib.h> //malloc
+#include <fcntl.h> //fd
 
-char	*get_next_line(int fd) 			
-{					
-    char	*buffer;					
-	int		bytes_read;						
-    int 	i;
-	char	c;							
+#ifndef BUFFER_SIZE
+# define BUFFER_SIZE 42
+#endif
 
-    i = 0;
-	if (fd < 0 || BUFFER_SIZE < 1)		
-		return (NULL);
-	buffer = malloc(42000000);
-	if (!buffer)
-		return (NULL);
-    bytes_read = read(fd, &c, 1);			
-	while (bytes_read > 0)
-	{
-		buffer[i] = c;	
+
+char *ft_strdup(char *line)
+{
+	char *new;
+	int i = 0;
+	while(line[i])
 		i++;
-		if (c == EOF || c == '\n')
-			break ;
-        bytes_read = read(fd, &c, 1);
-	}
-	if (i == 0 || bytes_read < 0)
+	new = malloc((i + 1)* sizeof(char *));
+	if(!new)
+		return(NULL);
+	i = 0;
+	while(line[i])
 	{
-		free(buffer);
-		return (NULL);
+		new[i] = line[i];
+		i++;
 	}
-	buffer[i] = '\0';			
-	return (buffer);		
+	new[i] = '\0';
+	return(new);
 }
 
-int		main(int ac, char **av)
+char *get_next_line(int fd)
 {
-	int		fd;
-	char	*line;
+	char			line[70000]; //el que devuelvo
+	static char		buffer[BUFFER_SIZE]; //donde hago la lectura
+	static int 		buffer_read; //lo que leemos
+	static int		buffer_pos; //lo que hemos copiado
+	int i;
 
-	if (ac == 2)
+	i = 0;
+	if(fd < 0 || BUFFER_SIZE <= 0)
+		return(NULL);
+	while(1)
 	{
-		fd = open(av[1], O_RDONLY);
-		if (fd < 0)
-			return (1);
-		line = get_next_line(fd);
-		while (line)
+		if(buffer_pos >= buffer_read)
 		{
-			printf("%s\n", line);
-			free(line);	
-			line = get_next_line(fd);
+			buffer_read = read(fd, buffer, BUFFER_SIZE);
+			buffer_pos = 0;
+			if(buffer_read <= 0)
+				break;
 		}
-		close(fd);
+		if(line[i - 1] == '\n')
+			break;
+		line[i] = buffer[buffer_pos];
+		i++;
+		buffer_pos++;
 	}
-	return (0);
+	line[i] = '\0';
+	if(i == 0)
+		return(NULL);
+	return(ft_strdup(line));
 }
