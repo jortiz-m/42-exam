@@ -3,88 +3,60 @@
 void	    ft_cd(t_minishell *minishell);
 static void	cd_path(t_minishell *minishell, char *arg);
 static void cd_error_check(t_minishell *minishell, char *path);
-static void	cd_oldpwd(t_minishell *minishell);
+static void	cd_old_pwd(t_minishell *minishell);
 static void	cd_home(t_minishell *minishell);
-static void	update_pwd(t_minishell *minishell, char *oldpwd);
-static void ft_setenv(t_minishell *minishell, const char *env_var, const char *value);
-static char	*expand_tilde(t_minishell *minishell, char *arg);
+static void	update_pwd(t_minishell *minishell, char *old_pwd);
+static void set_env(t_minishell *minishell, char *env_var, char *value);
+static bool find_in_matrix(char **matrix, char *var_name, int *index);
 
-static char	*expand_tilde(t_minishell *minishell, char *arg)
+static bool find_in_matrix(char **matrix, char *var_name, int *index)
 {
-    char    *home;
-    char    *new_path;
-
-    home = ft_getenv(minishell->envp, "HOME=");
-    if (!home)
-        return (NULL);
-    
-    // Si es solo "~", devolver HOME directamente
-    if (ft_strcmp(arg, "~") == 0)
+    *index = 0;
+    while (matrix && matrix[*index])
     {
-        free(arg);
-        return (ft_strdup(home));
+        if (!ft_strncmp(matrix[*index], var_name, ft_strlen(var_name)) && 
+            (matrix[*index][ft_strlen(var_name)] == '=' || 
+             matrix[*index][ft_strlen(var_name)] == '\0'))
+            return (true);
+        (*index)++;
     }
-    
-    // Si es "~/" o similar, concatenar
-    new_path = ft_strjoin(home, arg + 1); // mas 1 para quitar el coso al concatenar el home con arg
-    free(arg);
-    return (new_path);
+    return (false);
 }
 
-static void ft_setenv(t_minishell *minishell, const char *env_var, const char *value)
+static void set_env(t_minishell *minishell, char *env_var, char *value)
 {
-    char *new_var;
-    int i;
-    int len;
-    int env_len;
+    char	*new_var;
+    int		i;
 
-    len = ft_strlen(env_var); 
-    new_var = ft_strjoin(env_var, "="); // enchufarle el = 
-    new_var = ft_strjoin(env_var_eq, value); // unir "NAME=" con el valor "NAME=VALUE"
+    new_var = ft_strjoin(env_var, value);
     if (!new_var)
         return;
-    // Buscar si la variable ya existe
     i = 0;
-    while (minishell->envp[i]) // recorrer las variables de entorno
-    {
-        env_len = ft_strlen(minishell->envp[i]);
-        // Comprobar si el comienzo de la cadena coincide con la variable que estamos buscando
-        if (ft_strncmp(minishell->envp[i], env_var, len) == 0 && minishell->envp[i][len] == '=') 
-        {
-            // Si se encuentra la variable, se reemplaza
-            free(minishell->envp[i]);
-            minishell->envp[i] = new_var; // Nuevo valor a la variable de entorno
-            return ;
-        }
-        i++;
-    }
-    // Si se llega aquí es que no se ha encontrao
-    minishell->envp[i] = new_var; // Se creala nueva variable
-    minishell->envp[i + 1] = NULL;
+	if (find_in_matrix(minishell->envp, env_var, &i))
+	{
+		env_var = ft_strjoin(env_var, "=");
+		new_var = ft_strjoin(env_var, value);
+		matrix_replace(minishell->envp, i, new_var);
+		free(env_var);
+		free(new_var);
+	}
 }
 
-static void	update_pwd(t_minishell *minishell, char *oldpwd)
+static void	update_pwd(t_minishell *minishell, char *old_pwd)
 {
-	char	*cwd;
 	char	*new_pwd;
 
-	cwd = getcwd(NULL, 0); // donde nos encontramos actualmente
-	if (!cwd)
-		return ;
-	new_pwd = ft_strdup(cwd); //duplicar pa trabajar con la copia
-	free(cwd);
+	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)
 		return ;
-	ft_setenv(minishell, "OLDPWD", oldpwd);
-	ft_setenv(minishell, "PWD", new_pwd);
-    free(old);
-	free(new_pwd);
+	ft_set_env(minishell, "OLDPWD", old_pwd);
+	ft_set_env(minishell, "PWD", new_pwd);
 }
 
 static void	cd_home(t_minishell *minishell)
 {
 	char	*home;
-	char	*oldpwd;
+	char	*old_pwd;
 
 	home = ft_getenv(minishell->envp, "HOME=");
 	if (!home || home[0] == '\0')
@@ -93,42 +65,38 @@ static void	cd_home(t_minishell *minishell)
 		minishell->exit_status = 1;
 		return ;
 	}
-	oldpwd = getcwd(NULL, 0);
-	if (!oldpwd)
+	old_pwd = getcwd(NULL, 0);
+	if (!old_pwd)
 		return ;
 	if (chdir(home) == 0)
-		update_pwd(minishell, oldpwd);
+		update_pwd(minishell, old_pwd);
 	else
-		print_cd_error(home, "Failed to change directory", minishell);
-	free(oldpwd);
+		printf("minishell: cd: Failed to change directory %s", home);
 }
 
-static void	cd_oldpwd(t_minishell *minishell)
+static void	cd_old_pwd(t_minishell *minishell)
 {
-	char	*oldpwd;
-	char	*current;
+	char	*old_pwd;
+	char	*pwd;
 
-	oldpwd = ft_getenv(minishell->envp, "OLDPWD="); //buscarla en las variables de entorno
-	if (!oldpwd) // en caso de que no esté
+	old_pwd = ft_getenv(minishell->envp, "OLDPWD=");
+	if (!old_pwd)
 	{
 		printf("minishell: cd: OLDPWD not set\n");
 		minishell->exit_status = 1;
 		return ;
 	}
-	current = getcwd(NULL, 0); //se guarda el actual pa no perderlo
-	if (!current)
+	pwd = getcwd(NULL, 0);
+	if (!pwd)
 		return ;
-	if (chdir(oldpwd) == 0)
-	{
-		update_pwd(minishell, current); //actualizar variables
-		printf("%s\n", oldpwd);
-	}
+	if (chdir(old_pwd) == 0)
+		update_pwd(minishell, pwd);
 	else
-		print_cd_error(oldpwd, "Failed to change directory", minishell); //por si peta
-	free(current);
+		printf("minishell: cd: Failed to change directory %s", old_pwd);
+	free(pwd);
 }
 
-static void cd_error_check(t_minishell *minishell, char *path) //errores sin más
+static void cd_error_check(t_minishell *minishell, char *path)
 {
     struct stat info;
 
@@ -154,37 +122,24 @@ static void cd_error_check(t_minishell *minishell, char *path) //errores sin má
     }
 }
 
-
 static void	cd_path(t_minishell *minishell, char *arg)
 {
 	char	*path;
-	char	*oldpwd;
+	char	*old_pwd;
 
 	path = ft_strdup(arg);
 	if (!path)
 		return ;
-	if (path[0] == '~') //si resulta que es el coso
-	{
-		path = expand_tilde(minishell, path);
-		if (!path)
-		{
-			printf("minishell: cd: HOME not set\n");
-			minishell->exit_status = 1;
-			return ;
-		}
-	}
-	oldpwd = getcwd(NULL, 0);
-	if (!oldpwd)
-	{
-		free(path);
+	if (path[0] == '~')
+		cd_home(minishell);
+	old_pwd = getcwd(NULL, 0);
+	if (!old_pwd)
 		return ;
-	}
 	if (chdir(path) == 0)
-		update_pwd(minishell, oldpwd);
+		update_pwd(minishell, old_pwd);
 	else
 		cd_error_check(minishell, path);
-	free(oldpwd);
-	free(path);
+	free(old_pwd);
 }
 
 void	ft_cd(t_minishell *minishell)
@@ -202,9 +157,9 @@ void	ft_cd(t_minishell *minishell)
 		cd_home(minishell);
 		return ;
 	}
-	arg = minishell->input_matrix[1]; //mas legible evito hacer una linea muy larga
-	if (arg[0] == '-' && arg[1] == '\0') //comprobar que nos pasan "cd -"
-		cd_oldpwd(minishell);
+	arg = minishell->input_matrix[1];
+	if (arg[0] == '-' && arg[1] == '\0')
+		cd_old_pwd(minishell);
 	else
 		cd_path(minishell, arg);
 }
